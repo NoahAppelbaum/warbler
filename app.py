@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm, CSRFForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFForm, UserEditForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -33,9 +33,8 @@ def add_user_to_g():
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
-        #Establish global csrf form
+        # Establish global csrf form
         g.csrf_form = CSRFForm()
-
 
     else:
         g.user = None
@@ -230,7 +229,35 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = UserEditForm()
+
+    if form.validate_on_submit():
+        user = User.authenticate(g.user.username, form.password.data)
+
+        if user:
+
+            try:
+                for field in form:
+                    #TODO: fix this line break? VSC so mad at me.
+                    if field.name != 'password' and field.name != 'csrf_token' and field.data:
+                        setattr(user, field.name, field.data)
+
+                db.session.commit()
+
+            except IntegrityError:
+                flash("Username or Email already taken", 'danger')
+                return render_template('users/profile', form=form)
+
+            return redirect(f'/users/{user.id}')
+
+        else:
+            form.password.errors = ["Incorrect Password"]
+
+    return render_template('users/edit.html', form=form)
 
 
 @app.post('/users/delete')
