@@ -33,11 +33,15 @@ def add_user_to_g():
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
-        # Establish global csrf form
-        g.csrf_form = CSRFForm()
 
     else:
         g.user = None
+
+@app.before_request
+def add_csrfform_to_g():
+    """Establish global csrf form"""
+    if CURR_USER_KEY in session:
+        g.csrf_form = CSRFForm()
 
 
 def do_login(user):
@@ -242,8 +246,11 @@ def profile():
 
             try:
                 for field in form:
-                    #TODO: fix this line break? VSC so mad at me.
-                    if field.name != 'password' and field.name != 'csrf_token' and field.data:
+                    if (
+                    field.name !='password' and
+                    field.name != 'csrf_token' and
+                    field.data
+                    ):
                         setattr(user, field.name, field.data)
 
                 db.session.commit()
@@ -354,7 +361,9 @@ def homepage():
         followed_ids = [user.id for user in g.user.following]
         messages = (Message
                     .query
-                    .filter((Message.user == g.user) | (Message.user_id.in_(followed_ids)))
+                    .filter(
+                        (Message.user == g.user) |
+                        (Message.user_id.in_(followed_ids)))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
