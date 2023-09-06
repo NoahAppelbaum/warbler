@@ -57,7 +57,8 @@
         </li>
         <li><a href="/messages/new">New Message</a></li>
         <form action="/logout" method="POST">
-        <li><a href="/logout">Log out</a></li>
+          {{g.csrf_form.hidden_tag()}}
+        <li><button type="sumbit">Log out</button></li>
         </form>
       {% endif %}
 
