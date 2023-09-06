@@ -37,7 +37,17 @@ body.error-404 {
   font-weight: bold;
 }
 
+.navbar .btn-link {
+  color: #66757f;
+  font-size: 13px;
+  font-weight: bold;
+}
+
 .navbar a:hover {
+  color: #1c94e0;
+}
+
+.navbar .btn-link:hover {
   color: #1c94e0;
 }
 
