@@ -247,10 +247,12 @@ def profile():
                         setattr(user, field.name, field.data)
 
                 db.session.commit()
+                # WHY DOES G.USER UPDATE????
+
 
             except IntegrityError:
                 flash("Username or Email already taken", 'danger')
-                return render_template('users/profile', form=form)
+                return render_template('users/edit.html', form=form)
 
             return redirect(f'/users/{user.id}')
 
@@ -351,6 +353,8 @@ def homepage():
     if g.user:
         messages = (Message
                     .query
+                    #FIXME: FILTER NOT WORKING
+                    .filter((Message.user == g.user) | (g.user.is_following(Message.user)))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
