@@ -31,6 +31,8 @@ connect_db(app)
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
+    print("!!!before request called!!!")
+
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
 
@@ -40,8 +42,8 @@ def add_user_to_g():
 @app.before_request
 def add_csrfform_to_g():
     """Establish global csrf form"""
-    if CURR_USER_KEY in session:
-        g.csrf_form = CSRFForm()
+
+    g.csrf_form = CSRFForm()
 
 
 def do_login(user):
@@ -237,6 +239,7 @@ def profile():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    # FIXME: Do the form the edit form the normal way
     form = UserEditForm()
 
     if form.validate_on_submit():
@@ -255,6 +258,7 @@ def profile():
 
                 db.session.commit()
                 # WHY DOES G.USER UPDATE????
+                print("committed user changes. g.user.bio =", g.user.bio)
 
 
             except IntegrityError:
@@ -358,12 +362,10 @@ def homepage():
     """
 
     if g.user:
-        followed_ids = [user.id for user in g.user.following]
+        followed_ids = [user.id for user in g.user.following] + [g.user.id]
         messages = (Message
                     .query
-                    .filter(
-                        (Message.user == g.user) |
-                        (Message.user_id.in_(followed_ids)))
+                    .filter(Message.user_id.in_(followed_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
