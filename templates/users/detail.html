@@ -3,11 +3,7 @@
 {% block content %}
 
 <div id="warbler-hero"
-     class="full-width">
-     <!-- make this background image -->
-     <img src="{{ user.header_image_url }}"
-     alt="Header Image for {{ user.username }}"
-     style="height: 360px; width: 100%;">
+     class="full-width" style="background-image: url('{{ user.header_image_url }}');">
 </div>
 <img src="{{ user.image_url }}"
      alt="Image for {{ user.username }}"

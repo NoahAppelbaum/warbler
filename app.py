@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, CSRFForm, UserEditForm
 from models import db, connect_db, User, Message
+from models import DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
 
 load_dotenv()
 
@@ -239,8 +240,7 @@ def profile():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    # FIXME: Do the form the edit form the normal way
-    form = UserEditForm()
+    form = UserEditForm(obj=g.user)
 
     if form.validate_on_submit():
         user = User.authenticate(g.user.username, form.password.data)
@@ -248,20 +248,21 @@ def profile():
         if user:
 
             try:
-                for field in form:
-                    if (
-                    field.name !='password' and
-                    field.name != 'csrf_token' and
-                    field.data
-                    ):
-                        setattr(user, field.name, field.data)
+                user.username = form.username.data
+                user.email = form.email.data
+                user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+                user.header_image_url = (
+                    form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
+                )
+                user.bio = form.bio.data
 
                 db.session.commit()
                 # WHY DOES G.USER UPDATE????
                 print("committed user changes. g.user.bio =", g.user.bio)
 
-
+            #Issues Error handling -- getting both integrity errors and rollback
             except IntegrityError:
+                db.session.rollback()
                 flash("Username or Email already taken", 'danger')
                 return render_template('users/edit.html', form=form)
 
