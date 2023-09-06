@@ -351,10 +351,10 @@ def homepage():
     """
 
     if g.user:
+        followed_ids = [user.id for user in g.user.following]
         messages = (Message
                     .query
-                    #FIXME: FILTER NOT WORKING
-                    .filter((Message.user == g.user) | (g.user.is_following(Message.user)))
+                    .filter((Message.user == g.user) | (Message.user_id.in_(followed_ids)))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
