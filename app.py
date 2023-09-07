@@ -406,7 +406,7 @@ def add_or_remove_like(message_id):
             db.session.delete(like)
             db.session.commit()
 
-            return redirect(f'{request.args["requesting_page"]}')
+            return redirect('/')
 
         else:
             new_like = Like(
@@ -415,11 +415,11 @@ def add_or_remove_like(message_id):
                 )
             db.session.add(new_like)
             db.session.commit()
-            return redirect(f'{request.args["requesting_page"]}')
+            return redirect('/')
         #FIXME: fix these redirects
 
     else:
-        return render_template(f'{request.args["requesting_page"]}')
+        return render_template(f'{request.form["requesting_page"]}')
 
 
 @app.get('/users/<int:user_id>/likes')

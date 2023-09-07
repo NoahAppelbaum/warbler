@@ -3,8 +3,8 @@
 {% if message.user_id != g.user.id %}
   <form class="like-star" method="POST">
     {{ g.csrf_form.hidden_tag() }}
-    <input type="text" name="requesting_page" hidden
-    value="{{ url_for(request.endpoint) }}">
+    <!-- <input type="text" name="requesting_page" hidden
+    value="{{ request.endpoint }}"> -->
     <!-- FIXME: put this^ in forms.py? -->
 
 
