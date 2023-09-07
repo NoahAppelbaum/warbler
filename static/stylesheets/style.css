@@ -266,9 +266,8 @@ nav + .container {
 }
 
 .like-star {
-  position:absolute;
-  top: 2%;
-  right: 5%;
+  position:relative;
+  display: inline-block;
   z-index: 3;
 
 }
