@@ -199,6 +199,8 @@ class Like(db.Model):
         primary_key=True
     )
 
+    #FIXME: get rid of these -- make many:many relationship reference
+    #   in appropriate table
     message = db.relationship('Message',backref='likes')
     user = db.relationship('User',backref='likes')
 

@@ -387,7 +387,7 @@ def add_header(response):
 
 ##############################################################################
 # Likes
-
+#FIXME: split route -- adjust form buttons to send appropriate formactions
 @app.post('/messages/<int:message_id>/like')
 def add_or_remove_like(message_id):
     """handles liking / unliking a warble"""
@@ -406,7 +406,7 @@ def add_or_remove_like(message_id):
             db.session.delete(like)
             db.session.commit()
 
-            return redirect(f'/users/{g.user.id}/likes')
+            return redirect(f'{request.args["requesting_page"]}')
 
         else:
             new_like = Like(
@@ -415,10 +415,11 @@ def add_or_remove_like(message_id):
                 )
             db.session.add(new_like)
             db.session.commit()
-            return redirect(f'/users/{g.user.id}/likes')
+            return redirect(f'{request.args["requesting_page"]}')
+        #FIXME: fix these redirects
 
     else:
-        return render_template('/users/likes.html')
+        return render_template(f'{request.args["requesting_page"]}')
 
 
 @app.get('/users/<int:user_id>/likes')
@@ -439,9 +440,8 @@ def show_liked_messages(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
+    #FIXME: refactor with updated model reference
 
 
 
     return render_template(f'/users/likes.html', user=user, messages=messages)
-
-

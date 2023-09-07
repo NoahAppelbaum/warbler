@@ -1,14 +1,19 @@
 <!-- This is being used as an 'include' jinja template -->
 
 {% if message.user_id != g.user.id %}
-  <form action="/messages/{{ message.id }}/like" method="POST">
+  <form class="like-star" method="POST">
     {{ g.csrf_form.hidden_tag() }}
-    <!-- current URL "from" field? -->
+    <input type="text" name="requesting_page" hidden
+    value="{{ url_for(request.endpoint) }}">
+    <!-- FIXME: put this^ in forms.py? -->
+
 
     {% if message.id in g.user.likes|map(attribute='message_id') %}
-    <button type="submit" class="btn btn-link"><i class="bi bi-star-fill"></i></button>
+    <button formaction="/messages/{{ message.id }}/unlike" type="submit"
+    class="btn btn-link" id="unlike-btn"><i class="bi bi-star-fill"></i></button>
     {% else %}
-    <button type="submit" class="btn btn-link"><i class="bi bi-star"></i></button>
+    <button formaction="/messages/{{ message.id }}/like" type="submit"
+    class="btn btn-link" id="like-btn"><i class="bi bi-star"></i></button>
     {% endif %}
 
   </form>
