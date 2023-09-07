@@ -390,6 +390,7 @@ def add_header(response):
 
 @app.post('/messages/<int:message_id>/like')
 def add_or_remove_like(message_id):
+    """handles liking / unliking a warble"""
 
 
     form = g.csrf_form
@@ -405,7 +406,7 @@ def add_or_remove_like(message_id):
             db.session.delete(like)
             db.session.commit()
 
-            return redirect('/')
+            return redirect(f'/users/{g.user.id}/likes')
 
         else:
             new_like = Like(
@@ -414,21 +415,33 @@ def add_or_remove_like(message_id):
                 )
             db.session.add(new_like)
             db.session.commit()
-            return redirect('/users/likes') #history thing from below?
+            return redirect(f'/users/{g.user.id}/likes')
 
     else:
-        return render_template('/users/likes')
-
-#hidden ipunts for history to redirect back to??
-# input name="from" value="/messages/oerudr"
-# return redirect(f"form.from.data"")
-
-#TODO: liked messages list lives or /users/likes
+        return render_template('/users/likes.html')
 
 
+@app.get('/users/<int:user_id>/likes')
+def show_liked_messages(user_id):
+    """Show list of liked messages from this user."""
 
-# TODO: next steps:
-# adding the like button onto the pages with messages
-# maybe throwing that hidden from field in there when we put the csrf tag in
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
-# Like number and list of liked posts
+
+    user = User.query.get_or_404(user_id)
+
+    liked_ids = [like.message_id for like in g.user.likes]
+    messages = (Message
+                .query
+                .filter(Message.id.in_(liked_ids))
+                .order_by(Message.timestamp.desc())
+                .limit(100)
+                .all())
+
+
+
+    return render_template(f'/users/likes.html', user=user, messages=messages)
+
+

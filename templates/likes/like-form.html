@@ -1,3 +1,5 @@
+<!-- This is being used as an 'include' jinja template -->
+
 {% if message.user_id != g.user.id %}
   <form action="/messages/{{ message.id }}/like" method="POST">
     {{ g.csrf_form.hidden_tag() }}
