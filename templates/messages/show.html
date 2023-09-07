@@ -44,8 +44,8 @@
           <p class="single-message">{{ message.text }}</p>
           <span class="text-muted">
               {{ message.timestamp.strftime('%d %B %Y') }}
+              {% include '/likes/like-form.html' %}
             </span>
-            {% include '/likes/like-form.html' %}
         </div>
       </li>
     </ul>

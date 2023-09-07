@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 toolbar = DebugToolbarExtension(app)
 
@@ -387,11 +387,28 @@ def add_header(response):
 
 ##############################################################################
 # Likes
-#FIXME: split route -- adjust form buttons to send appropriate formactions
-@app.post('/messages/<int:message_id>/like')
-def add_or_remove_like(message_id):
-    """handles liking / unliking a warble"""
 
+@app.post('/messages/<int:message_id>/like')
+def add_like(message_id):
+    """handles liking a warble"""
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+        new_like = Like(
+            user_id=g.user.id,
+            message_id=message_id
+            )
+        db.session.add(new_like)
+        db.session.commit()
+        return redirect(f'{request.form["requesting_page"]}')
+
+    else:
+        return redirect(f'{request.form["requesting_page"]}')
+
+@app.post('/messages/<int:message_id>/unlike')
+def remove_like(message_id):
+    """handles liking / unliking a warble"""
 
     form = g.csrf_form
 
@@ -406,20 +423,7 @@ def add_or_remove_like(message_id):
             db.session.delete(like)
             db.session.commit()
 
-            return redirect('/')
-
-        else:
-            new_like = Like(
-                user_id=g.user.id,
-                message_id=message_id
-                )
-            db.session.add(new_like)
-            db.session.commit()
-            return redirect('/')
-        #FIXME: fix these redirects
-
-    else:
-        return render_template(f'{request.form["requesting_page"]}')
+    return redirect(f'{request.form["requesting_page"]}')
 
 
 @app.get('/users/<int:user_id>/likes')
