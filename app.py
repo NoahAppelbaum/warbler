@@ -405,6 +405,8 @@ def add_or_remove_like(message_id):
             db.session.delete(like)
             db.session.commit()
 
+            return redirect('/')
+
         else:
             new_like = Like(
                 user_id=g.user.id,

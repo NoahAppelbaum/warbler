@@ -3,10 +3,10 @@
     {{ g.csrf_form.hidden_tag() }}
     <!-- current URL "from" field? -->
 
-    {% if message.id in g.user.likes|map(attribute='message_id')|join(', ') %}
-    <button type="submit"><i class="bi bi-star-fill"></i></button>
+    {% if message.id in g.user.likes|map(attribute='message_id') %}
+    <button type="submit" class="btn btn-link"><i class="bi bi-star-fill"></i></button>
     {% else %}
-    <button type="submit"><i class="bi bi-star"></i></button>
+    <button type="submit" class="btn btn-link"><i class="bi bi-star"></i></button>
     {% endif %}
 
   </form>
