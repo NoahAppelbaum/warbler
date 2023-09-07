@@ -87,6 +87,8 @@ class User(db.Model):
         nullable=False,
     )
 
+    #DB RELATIONSHIPS
+
     messages = db.relationship('Message', backref="user")
 
     followers = db.relationship(

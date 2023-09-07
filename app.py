@@ -433,15 +433,6 @@ def show_liked_messages(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    liked_ids = [like.message_id for like in g.user.likes]
-    messages = (Message
-                .query
-                .filter(Message.id.in_(liked_ids))
-                .order_by(Message.timestamp.desc())
-                .limit(100)
-                .all())
-    #FIXME: refactor with updated model reference
 
 
-
-    return render_template(f'/users/likes.html', user=user, messages=messages)
+    return render_template(f'/users/likes.html', user=user)
