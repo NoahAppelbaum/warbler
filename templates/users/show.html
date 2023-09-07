@@ -3,7 +3,8 @@
 <div class="col-sm-6">
   <ul class="list-group" id="messages">
 
-    {% for message in user.messages %}
+    {% for message in user.messages|reverse %}
+    <!-- Fixed bug where messages were displaying in ASC order -->
 
     <li class="list-group-item">
       <a href="/messages/{{ message.id }}" class="message-link"></a>
