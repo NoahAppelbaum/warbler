@@ -395,8 +395,38 @@ def add_or_remove_like(message_id):
     form = g.csrf_form
 
     if form.validate_on_submit():
-        if (Like.query.filter(
+        like = (Like.query.filter(
                             (Like.user_id==g.user.id)&
                             (Like.message_id==message_id))
-                            .all()
-        ):
+                            .one_or_none()
+        )
+
+        if like:
+            db.session.delete(like)
+            db.session.commit()
+
+        else:
+            new_like = Like(
+                user_id=g.user.id,
+                message_id=message_id
+                )
+            db.session.add(new_like)
+            db.session.commit()
+            return redirect('/users/likes') #history thing from below?
+
+    else:
+        return render_template('/users/likes')
+
+#hidden ipunts for history to redirect back to??
+# input name="from" value="/messages/oerudr"
+# return redirect(f"form.from.data"")
+
+#TODO: liked messages list lives or /users/likes
+
+
+
+# TODO: next steps:
+# adding the like button onto the pages with messages
+# maybe throwing that hidden from field in there when we put the csrf tag in
+
+# Like number and list of liked posts

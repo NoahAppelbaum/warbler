@@ -187,21 +187,16 @@ class Like(db.Model):
 
     __tablename__ = 'likes'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-    )
-
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete='CASCADE'),
-        nullable=False,
+        PrimaryKey=True
     )
-
+    # FIXME: Doesn't like this primary key assignment
     message_id = db.Column(
         db.Integer,
         db.ForeignKey('messages.id', ondelete='CASCADE'),
-        nullable=False,
+        PrimaryKey=True
     )
 
     message = db.relationship('Message',backref='likes')
