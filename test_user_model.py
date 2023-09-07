@@ -8,7 +8,8 @@
 import os
 from unittest import TestCase
 
-from models import db, User, Message, Follow
+from models import db, User, Message, Follow, DEFAULT_IMAGE_URL
+from sqlalchemy.exc import IntegrityError
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -27,6 +28,10 @@ from app import app
 
 db.drop_all()
 db.create_all()
+
+TEST_IMAGE_URL = 'https://upload.wikimedia.org/wikipedia/commons/'\
+                            'thumb/1/11/Canis_lupus_familiaris.002_-_Monfero.j'\
+                            'pg/640px-Canis_lupus_familiaris.002_-_Monfero.jpg'
 
 
 class UserModelTestCase(TestCase):
@@ -66,8 +71,71 @@ class UserModelTestCase(TestCase):
 
         self.assertTrue(u1.is_following(u2))
 
-    def test_not_following(self):
+    def test_is_not_following(self):
         u1 = User.query.get(self.u1_id)
         u2 = User.query.get(self.u2_id)
 
         self.assertFalse(u1.is_following(u2))
+
+    def test_is_followed_by(self):
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        follow = Follow(
+            user_being_followed_id=self.u2_id,
+            user_following_id=self.u1_id
+        )
+
+        db.session.add(follow)
+        db.session.commit()
+
+        self.assertTrue(u2.is_followed_by(u1))
+
+    def test_is_not_followed_by(self):
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertFalse(u2.is_followed_by(u1))
+
+    def test_user_sign_up(self):
+        new_user3 = User.signup("u3", "u3@email.com", "password", None)
+        new_user4 = User.signup(
+                            "u4",
+                            "u4@email.com",
+                            "password",
+                            TEST_IMAGE_URL)
+
+        db.session.commit()
+
+        u3_id = new_user3.id
+        u4_id = new_user4.id
+
+        u3 = User.query.get(u3_id)
+        u4 = User.query.get(u4_id)
+
+        self.assertEqual((u3.username), 'u3')
+        self.assertEqual((u3.email), 'u3@email.com')
+        self.assertIn('$2b$', (u3.password))
+        self.assertEqual((u3.image_url), DEFAULT_IMAGE_URL)
+        self.assertEqual((u4.image_url), TEST_IMAGE_URL)
+
+    def test_user_sign_up_fails(self):
+
+        self.assertRaises(
+                    IntegrityError,
+                    User.signup,
+                    "u2",
+                    "u2@email.com",
+                    "password",
+                    None
+        )
+        self.assertRaises(
+                    IntegrityError,
+                    User.signup,
+                    "u4",
+                    "u4@email.com",
+                    TEST_IMAGE_URL,
+                    password = None
+        )
+
+
