@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, CSRFForm, UserEditForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Like
 from models import DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
 
 load_dotenv()
@@ -384,3 +384,19 @@ def add_header(response):
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
     response.cache_control.no_store = True
     return response
+
+##############################################################################
+# Likes
+
+@app.post('/messages/<int:message_id>/like')
+def add_or_remove_like(message_id):
+
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+        if (Like.query.filter(
+                            (Like.user_id==g.user.id)&
+                            (Like.message_id==message_id))
+                            .all()
+        ):
