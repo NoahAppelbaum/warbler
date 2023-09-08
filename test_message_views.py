@@ -20,6 +20,7 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 # Now we can import app
 
 from app import app, CURR_USER_KEY
+from test_message_model import EXCESSIVE_TEXT
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -65,9 +66,33 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
                 sess[CURR_USER_KEY] = self.u1_id
 
             # Now, that session setting is saved, so we can have
-            # the rest of ours test
+            # the rest of our tests
             resp = c.post("/messages/new", data={"text": "Hello"})
 
             self.assertEqual(resp.status_code, 302)
 
             Message.query.filter_by(text="Hello").one()
+
+
+    def test_add_message_form(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get("/messages/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("create message page", html)
+
+
+    def test_add_message_bad_data(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post("/messages/new", data={"text": EXCESSIVE_TEXT})
+            html = resp.get_data(as_text=True)
+
+            self.assertIn("create message page", html)
+            self.assertIn("140", html)
