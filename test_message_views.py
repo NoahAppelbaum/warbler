@@ -85,7 +85,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("create message page", html)
 
-
     def test_add_message_bad_data(self):
         with self.client as c:
             with c.session_transaction() as sess:
@@ -96,3 +95,93 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
             self.assertIn("create message page", html)
             self.assertIn("140", html)
+
+    def test_add_message_user_not_logged_in(self):
+        with self.client as c:
+            resp = c.get("/messages/new")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+class MessageShowViewTestCase(MessageBaseViewTestCase):
+
+
+    def test_show_message_user_not_logged_in(self):
+        with self.client as c:
+            resp = c.get(f"/messages/{self.m1_id}")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_show_message(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get(f"/messages/{self.m1_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("m1-text", html)
+
+    def test_show_message_bad_id(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get(f"/messages/9999")
+
+            self.assertEqual(resp.status_code, 404)
+
+class MessageDeleteTestCase(MessageBaseViewTestCase):
+
+    def test_delete_message_user_not_logged_in(self):
+        with self.client as c:
+            resp = c.post(f"/messages/{self.m1_id}/delete")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_delete_message_bad_id(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post(f"/messages/9999/delete")
+
+            self.assertEqual(resp.status_code, 404)
+
+    def test_show_message(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post(f"/messages/{self.m1_id}/delete")
+
+            self.assertEqual(resp.status_code, 302)
+
+            empty_messages = Message.query.all()
+
+            self.assertEqual(len(empty_messages),0)
+
+class HomepageViewTestCase(MessageBaseViewTestCase):
+
+    def test_show_homepage(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get("/")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("m1-text", html)
+            self.assertIn("home view page", html)
+
+    def test_show_homepage_user_not_logged_in(self):
+        with self.client as c:
+            resp = c.get("/")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("home-anon view page", html)
