@@ -59,7 +59,7 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(message.text, "test")
         self.assertEqual(message.user_id, self.u1_id)
 
-    def test_message_instantiation_exceptions(self):
+    # def test_message_instantiation_exceptions(self):
 
         #TODO: implement `with self.assertRaises(Exception): ...`
 
@@ -78,3 +78,9 @@ class MessageModelTestCase(TestCase):
 
         # db.session.add(message_bad_user_id)
         # self.assertRaises(IntegrityError, db.session.commit())
+
+    def test_user_linked_to_message(self):
+        message = Message.query.get(self.msg_id)
+
+        self.assertEqual(message.user.id, self.u1_id)
+        self.assertEqual(message.user_id, self.u1_id)
