@@ -19,7 +19,8 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 # Now we can import app
 
-from app import app, CURR_USER_KEY
+from app import app, session, CURR_USER_KEY
+from flask import g
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -68,11 +69,9 @@ class UserSignupViewTestCase(UserBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("user signup page", html)
 
-    def test_add_message(self):
+    def test_user_signup(self):
         with self.client as c:
 
-            # Now, that session setting is saved, so we can have
-            # the rest of our tests
             resp = c.post("/signup", data={
                                             "username": "test",
                                             "password": "password",
@@ -82,3 +81,43 @@ class UserSignupViewTestCase(UserBaseViewTestCase):
 
             self.assertEqual(resp.status_code, 302)
             User.query.filter_by(username="test").one()
+
+class UserLogInViewTestCase(UserBaseViewTestCase):
+
+
+    def test_user_login(self):
+        with self.client as c:
+
+            resp = c.post("/login", data={
+                                            "username": "u1",
+                                            "password": "password",
+            })
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location,"/")
+            self.assertEqual(session[CURR_USER_KEY],self.u1_id)
+
+
+    def test_user_login_failed(self):
+        with self.client as c:
+
+            resp = c.post("/login", data={
+                                            "username": "u1",
+                                            "password": "123456",
+            })
+
+            html = resp.get_data(as_text=True)
+            self.assertIn("Invalid credentials.", html)
+
+
+class UserLogOutViewTestCase(UserBaseViewTestCase):
+
+    def test_logout(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post("logout")
+
+            self.assertEqual(resp.location,"/login")
+            self.assertNotIn(CURR_USER_KEY,session)
