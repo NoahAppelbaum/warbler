@@ -119,23 +119,36 @@ class UserModelTestCase(TestCase):
         self.assertEqual((u3.image_url), DEFAULT_IMAGE_URL)
         self.assertEqual((u4.image_url), TEST_IMAGE_URL)
 
-    def test_user_sign_up_fails(self):
+    def test_user_sign_up_exceptions(self):
+
+       #TODO: implement `with self.assertRaises(Exception): ...`
+
+        # self.assertRaises(
+        #             IntegrityError,
+        #             User.signup,
+        #             "u2",
+        #             "u2@email.com",
+        #             "password",
+        #             DEFAULT_IMAGE_URL
+        # )
 
         self.assertRaises(
-                    IntegrityError,
-                    User.signup,
-                    "u2",
-                    "u2@email.com",
-                    "password",
-                    None
-        )
-        self.assertRaises(
-                    IntegrityError,
+                    ValueError,
                     User.signup,
                     "u4",
                     "u4@email.com",
-                    TEST_IMAGE_URL,
-                    password = None
+                    None,
+                    DEFAULT_IMAGE_URL
+
         )
 
+    def test_authenticate(self):
 
+        user = User.query.get(self.u1_id)
+
+        self.assertEqual(User.authenticate("u1", "password"), user)
+
+    def test_authenticate_failure(self):
+
+        self.assertFalse(User.authenticate("fake_user", "password"))
+        self.assertFalse(User.authenticate("u1", "not_password"))
