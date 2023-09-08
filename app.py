@@ -253,6 +253,7 @@ def profile():
                     form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
                 )
                 user.bio = form.bio.data
+                user.location = form.location.data
 
                 db.session.commit()
                 # WHY DOES G.USER UPDATE????

@@ -56,6 +56,11 @@ class UserEditForm(FlaskForm):
         validators=[Optional(), URL(), Length(max=255)]
     )
 
+    location = StringField(
+        'Location',
+        validators=[Optional(), Length(max=30)],
+    )
+
     bio = TextAreaField(
         'Bio',
         validators=[Optional()]
