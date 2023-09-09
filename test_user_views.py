@@ -121,3 +121,57 @@ class UserLogOutViewTestCase(UserBaseViewTestCase):
 
             self.assertEqual(resp.location,"/login")
             self.assertNotIn(CURR_USER_KEY,session)
+
+    def test_logout_not_logged_in(self):
+        with self.client as c:
+
+            resp = c.post("logout")
+
+            self.assertEqual(resp.location,"/login")
+            self.assertNotIn(CURR_USER_KEY,session)
+
+
+class UserListUserstViewTestCase(UserBaseViewTestCase):
+
+    def test_list_users_search(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get("/users", data={"q": "u1"})
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("u1", html)
+            # self.assertNotIn("u2", html)
+            # TODO: it's possible "u2" is just somewhere in the html
+
+
+    def test_list_users_all(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get("/users")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("u1", html)
+            self.assertIn("u2", html)
+
+
+
+
+
+
+    def test_list_users_not_logged_in(self):
+        with self.client as c:
+            resp = c.get("/users")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+
+
+
+    # all users (2)

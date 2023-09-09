@@ -164,7 +164,6 @@ class UserModelTestCase(TestCase):
                     "u4@email.com",
                     None,
                     DEFAULT_IMAGE_URL
-
         )
 
     def test_authenticate(self):
